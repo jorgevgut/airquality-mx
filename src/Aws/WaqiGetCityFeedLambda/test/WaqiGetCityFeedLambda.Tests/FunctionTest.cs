@@ -7,9 +7,9 @@ using Xunit;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.TestUtilities;
 
-using WaqiGetiCityFeedLambda;
+using WaqiGetCityFeedLambda;
 
-namespace WaqiGetiCityFeedLambda.Tests
+namespace WaqiGetCityFeedLambda.Tests
 {
     public class FunctionTest
     {

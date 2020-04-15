@@ -21,11 +21,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirQualityCdk", "cloud-infr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aws", "Aws", "{E3CBCBC9-64B8-4D1B-B7CA-1845A9E1DD37}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WaqiGetiCityFeedLambda", "WaqiGetiCityFeedLambda", "{E9580214-088B-4BA4-BD2E-8CDB81139E84}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WaqiGetCityFeedLambda", "WaqiGetCityFeedLambda", "{E9580214-088B-4BA4-BD2E-8CDB81139E84}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2F0D8298-0882-46F0-AFFE-58D02F8C2CFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaqiGetiCityFeedLambda", "src\Aws\WaqiGetiCityFeedLambda\src\WaqiGetiCityFeedLambda\WaqiGetiCityFeedLambda.csproj", "{F5B188D1-0633-4762-8A45-DE0D787DF28E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaqiGetCityFeedLambda", "src\Aws\WaqiGetCityFeedLambda\src\WaqiGetCityFeedLambda\WaqiGetCityFeedLambda.csproj", "{F5B188D1-0633-4762-8A45-DE0D787DF28E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

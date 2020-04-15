@@ -10,6 +10,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\WaqiGetiCityFeedLambda\WaqiGetiCityFeedLambda.csproj" />
+    <ProjectReference Include="..\..\src\WaqiGetCityFeedLambda\WaqiGetCityFeedLambda.csproj" />
   </ItemGroup>
 </Project>

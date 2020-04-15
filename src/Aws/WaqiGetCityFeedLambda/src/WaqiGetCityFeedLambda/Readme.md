@@ -12,8 +12,8 @@ dotnet tool install -g Amazon.Lambda.Tools
 dotnet lambda package
 
 # Use AWS CLi to upload on to S3 bucket, pickup configuration from your environment
-# from WaqiGetCityFeedLambda directory look for bin/Release/netcoreapp3.1/WaqiGetiCityFeedLambda.zip
-aws s3 cp  bin/Release/netcoreapp3.1/WaqiGetiCityFeedLambda.zip s3://yourbucket/
+# from WaqiGetCityFeedLambda directory look for bin/Release/netcoreapp3.1/WaqiGetCityFeedLambda.zip
+aws s3 cp  bin/Release/netcoreapp3.1/WaqiGetCityFeedLambda.zip s3://yourbucket/
 
 # View contents
 aws s3 ls yourbucket --recursive --human-readable --summarize
