@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Latincoder.AirQuality.Model
+namespace Latincoder.AirQuality.Model.External
 {
     public class WaqiCityFeed
     {
@@ -24,24 +24,31 @@ namespace Latincoder.AirQuality.Model
         [JsonPropertyName("aqi")]
         public int Aqi { get; set; }
 
+        [JsonPropertyName("idx")]
+        public int Idx { get; set; }
+
         [JsonPropertyName("time.s")]
-        public string TimeStr { get; }
-        
+        public string TimeStr { get; set; }
+
+        [JsonPropertyName("city")]
+        public City City { get; set; }        
     }
 
     public class City {
         [JsonPropertyName("name")]
-        public string Name { get; }
+        public string Name { get; set; }
 
         [JsonPropertyName("geo")]
-        public List<int> Coordinates { get; }
+        public List<float> Coordinates { get; set; }
 
         [JsonPropertyName("url")]
-        public string Url { get; }
+        public string Url { get; set; }
 
     }
 
     public class Attribution {
+        public Attribution() {}
+        
         [JsonPropertyName("url")]
         public string Url { get; set; }
 

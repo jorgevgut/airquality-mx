@@ -12,22 +12,32 @@ namespace Latincoder.AirQuality.Proxies
     {
         // constants
         private const string ApiDomain = "https://api.waqi.info";
-        private static readonly HttpClient client = new HttpClient();
+        public static readonly HttpClient defaultClient = new HttpClient();
         private string token;
-        
+        private HttpClient _client;        
         private Waqi(string token) {
             this.token = token;
+            _client = Waqi.defaultClient;
+        }
+
+        private Waqi(HttpClient client, string token) {
+            this.token = token;
+            _client = client;
         }
 
         public static Waqi create(string token) {
             return new Waqi(token);
         }
 
+        public static Waqi create(HttpClient client, string token) {
+            return new Waqi(client, token);
+        }
+
         public async Task<string> getCityFeed(string city) {
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Add("User-Agent", ".Net - LatinCoder.AirQuality");
-            var response = await client.GetStringAsync($"{ApiDomain}/feed/{city}/?token={token}");
+            _client.DefaultRequestHeaders.Accept.Clear();
+            _client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            _client.DefaultRequestHeaders.Add("User-Agent", ".Net - LatinCoder.AirQuality");
+            var response = await _client.GetStringAsync($"{ApiDomain}/feed/{city}/?token={token}");
             return response;
         }
 
