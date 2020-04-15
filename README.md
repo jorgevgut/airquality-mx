@@ -8,6 +8,14 @@ This can be called a 'personal' project by [@jorge\_vgut](https://twitter.com/jo
 **This project is in DEVELOPMENT** and in early stages.**
 If you would like to learn more about this, please head to our [Wiki on Github](https://github.com/jorgevgut/airquality-mx/wiki).
 
+## Coding guidelines
+Intention is to follow Microsoft's dotnet best practices.
+Visit their dotnet/runtime project on Github.
+https://github.com/dotnet/runtime/blob/master/docs/coding-guidelines/coding-style.md
+
+Use CodeFormatter: https://github.com/dotnet/codeformatter
+as a tool to format code.
+
 ## Contributions
 
 Currently the project is not accepting code contributions(pull requests, or else)

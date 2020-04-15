@@ -28,7 +28,7 @@ namespace WaqiGetCityFeedLambda
         {
             await AsyncExecute(input, context);
         }
-    
+
         public async Task<string> AsyncExecute(string input, ILambdaContext context) {
 
                 var waqiProxy = Waqi.create("sometoken"); // add token
@@ -44,7 +44,7 @@ namespace WaqiGetCityFeedLambda
                     string mutableString = string.Empty;
                     try {
                         mutableString = await waqiProxy.getCityFeed(feed);
-                            
+
                         if(mutableString != string.Empty) {
                             System.Console.WriteLine("found this result:\n");
                             System.Console.WriteLine(mutableString);

@@ -28,8 +28,8 @@ namespace Latincoder.AirQuality.Model.DTO
                                 station.Data.City.Name,
                                 station.Data.City.Url,
                                 Attribution.ListFrom(station.Data.Attributions));
-            
-            return new CityFeed{
+
+            return new CityFeed {
                 Stations = stations.ToList(),
                 CityName = CityFeed.findBestCityName(stations.ToList()),
                 _maxAqiStation = (from station in stations
@@ -49,7 +49,7 @@ namespace Latincoder.AirQuality.Model.DTO
         // TODO: accessing MaxAqiStation is O(n) - cache result in private field
         public Station MaxAqiStation { get => _maxAqiStation; }
 
-        /* 
+        /*
             internal methods - validations and utilities of this  class
             method which do not required of an instance are static
 
@@ -75,7 +75,7 @@ namespace Latincoder.AirQuality.Model.DTO
 
         static string findBestCityName(List<Station> stations) {
             var bestStation = (from station in stations
-                    orderby station.AQI descending 
+                    orderby station.AQI descending
                     select station).ToList().First();
             return getCityNameFromUrl(bestStation.Url);
         }

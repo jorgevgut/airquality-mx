@@ -88,6 +88,6 @@ namespace Latincoder.AirQuality.Tests.Model.DTO
             Assert.Equal(attributions.Count(), waqiStations.Count());
         }
 
-        
+
     }
 }
