@@ -92,9 +92,68 @@ namespace AirQualityCdk
                 Description = @"THis is role is to be used by lambda functions within AirQuality project",
                 AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
             });
-
+            // Adding permissions
+            role.AddToPolicy(SQSFullAccess);
+            role.AddToPolicy(SNSFullAccess);
+            role.AddToPolicy(LambdaFullAccess);
+            role.AddToPolicy(DynamoFullAccess);
             return role;
         }
+
+        /*
+            Useful policy statements
+            TODO: code more restrictive policies
+        */
+
+        internal PolicyStatement LambdaFullAccess {
+            get {
+            var policyProps = new PolicyStatementProps();
+            policyProps.Actions = new string[]{"lambda:*"};
+            policyProps.Effect = Effect.ALLOW;
+            policyProps.Resources = new string[]{"*"};
+            return new PolicyStatement(policyProps);
+            }
+        }
+        internal PolicyStatement CloudWatchFullAccess {
+            get {
+            var policyProps = new PolicyStatementProps();
+            policyProps.Actions = new string[]{"cloudwatch:*"};
+            policyProps.Effect = Effect.ALLOW;
+            policyProps.Resources = new string[]{"*"};
+            return new PolicyStatement(policyProps);
+            }
+        }
+
+        internal PolicyStatement DynamoFullAccess {
+            get {
+            var policyProps = new PolicyStatementProps();
+            policyProps.Actions = new string[]{"dynamodb:*"};
+            policyProps.Effect = Effect.ALLOW;
+            policyProps.Resources = new string[]{"*"};
+            return new PolicyStatement(policyProps);
+            }
+        }
+
+         internal PolicyStatement SNSFullAccess {
+            get {
+            var policyProps = new PolicyStatementProps();
+            policyProps.Actions = new string[]{"SNS:*"};
+            policyProps.Effect = Effect.ALLOW;
+            policyProps.Resources = new string[]{"*"};
+            return new PolicyStatement(policyProps);
+            }
+        }
+
+                 internal PolicyStatement SQSFullAccess {
+            get {
+            var policyProps = new PolicyStatementProps();
+            policyProps.Actions = new string[]{"SQS:*"};
+            policyProps.Effect = Effect.ALLOW;
+            policyProps.Resources = new string[]{"*"};
+            return new PolicyStatement(policyProps);
+            }
+        }
+
         internal void ConstructLambdas(IDictionary<string, KeyValuePair<string, string>> metadata) {
             var lambdaOptions = new List<AirQualityLambdaOptions>();
             lambdaOptions.Add(new AirQualityLambdaOptions{
