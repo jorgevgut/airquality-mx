@@ -6,7 +6,7 @@ namespace Latincoder.AirQuality.Proxies
     /// <summary>
     /// This class is a client Proxy used to consume API from
     /// the World's Air Quality Index Project.
-    /// See https://aqicn.org/api for more details 
+    /// See https://aqicn.org/api for more details
     /// </summary>
     public class Waqi
     {
@@ -14,7 +14,7 @@ namespace Latincoder.AirQuality.Proxies
         private const string ApiDomain = "https://api.waqi.info";
         public static readonly HttpClient defaultClient = new HttpClient();
         private string token;
-        private HttpClient _client;        
+        private HttpClient _client;
         private Waqi(string token) {
             this.token = token;
             _client = Waqi.defaultClient;

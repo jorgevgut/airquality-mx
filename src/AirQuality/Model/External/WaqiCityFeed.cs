@@ -10,7 +10,7 @@ namespace Latincoder.AirQuality.Model.External
 
         [JsonPropertyName("data")]
         public Data Data { get; set; }
-        
+
     }
 
     public class Data {
@@ -20,9 +20,10 @@ namespace Latincoder.AirQuality.Model.External
         /// <summary>
         /// Represents the index that determines air quality, lower is better
         /// </summary>
-        /// <value>Air Quality Index</value>
+        /// <value>Air Quality Index which may be int or string if it is not available</value>
+        /// <remarks>Whenever a type object is deserialized we get a JsonElement</remarks>
         [JsonPropertyName("aqi")]
-        public int Aqi { get; set; }
+        public object Aqi { get; set; }
 
         [JsonPropertyName("idx")]
         public int Idx { get; set; }
@@ -31,7 +32,7 @@ namespace Latincoder.AirQuality.Model.External
         public string TimeStr { get; set; }
 
         [JsonPropertyName("city")]
-        public City City { get; set; }        
+        public City City { get; set; }
     }
 
     public class City {
@@ -48,7 +49,7 @@ namespace Latincoder.AirQuality.Model.External
 
     public class Attribution {
         public Attribution() {}
-        
+
         [JsonPropertyName("url")]
         public string Url { get; set; }
 

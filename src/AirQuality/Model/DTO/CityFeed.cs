@@ -2,11 +2,13 @@ using Latincoder.AirQuality.Model.External;
 
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace Latincoder.AirQuality.Model.DTO
 {
     public class CityFeed
     {
+        private const int AqiNotAvailable = -1;
         private Station _maxAqiStation;
 
         /* Constructor methods*/
@@ -16,15 +18,20 @@ namespace Latincoder.AirQuality.Model.DTO
             Stations = stations;
             CityName = cityName;
             _maxAqiStation = (from station in stations
+                        where station.AQI > AqiNotAvailable
                         orderby station.AQI descending
-                        select station).First();
+                        select station).FirstOrDefault();
         }
 
 
         public static CityFeed From(List<WaqiCityFeed> waqiStations) {
             var stations = from station in waqiStations
+                            let dynamicAqi = station.Data.Aqi
+                            // System.Text.Json obtains JsonElement - if serializer changes this will fail
+                            let aqi = (JsonElement) dynamicAqi
+                            let isNumber = aqi.ValueKind == JsonValueKind.Number
                             select new Station(station.Data.Idx.ToString(),
-                                station.Data.Aqi,
+                                isNumber ? aqi.GetInt32() : AqiNotAvailable,
                                 station.Data.City.Name,
                                 station.Data.City.Url,
                                 Attribution.ListFrom(station.Data.Attributions));
