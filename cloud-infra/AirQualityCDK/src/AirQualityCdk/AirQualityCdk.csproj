@@ -17,4 +17,8 @@
     -->
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\AirQuality\AirQuality.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -24,19 +24,22 @@ namespace AirQualityCdk
         /// <returns></returns>
         internal AirQualityCdkStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
         {
+            // Metadata to be used by internal construct methods - might need a bit of refactoring and better design
+            // this holds keyvaluePairs which can be used to configure environmentVariables
+            var metadata = new Dictionary<string, KeyValuePair<string, string>>();
             // The code that defines your stack goes here
             // SNS Topics
             new Topic(this, "TwitterNotificationPublisher");
             new Topic(this, "EmailNotificationPublisher");
 
             // SQS queues
-            AirQualitySQS("CityFeedQueue");
-
+            var cityFeedSqs = AirQualitySQS("CityFeedQueue");
+            metadata[Constants.EnvCityFeedSqsUrl] = KeyValuePair.Create(Constants.EnvCityFeedSqsUrl, cityFeedSqs.QueueUrl);
 
             // AWS lambdas
             // TODO: Lambda generation logic to be done using environment values. Config might also be pulled from S3
             // GetCityFeed lambda
-            ConstructLambdas();
+            ConstructLambdas(metadata);
 
             // Event schedule
             new Rule(this, "Waqi5min", new RuleProps{
@@ -54,8 +57,8 @@ namespace AirQualityCdk
         {
             var properties = new FunctionProps();
             properties.Runtime = Runtime.DOTNET_CORE_3_1;
-            // ensures unique Function names
-            var functionName = $"{name}-{Guid.NewGuid().ToString()}";
+            // ensures unique Function names - use substring because of 64 character name limit
+            var functionName = $"{name}-{Guid.NewGuid().ToString().Substring(0,12)}";
             properties.FunctionName = functionName;
 
             // Add Environment variables
@@ -84,15 +87,15 @@ namespace AirQualityCdk
         internal Role LambdaAirRole(string name) {
 
             // TODO: create roles with required permissions
-            var role = new Role(this, $"lambda-air-{name}", new RoleProps{
-                RoleName = $"lambda-air-{name}",
+            var role = new Role(this, $"lrole-{Guid.NewGuid().ToString()}", new RoleProps{
+                RoleName = $"lrole-{Guid.NewGuid().ToString()}",
                 Description = @"THis is role is to be used by lambda functions within AirQuality project",
                 AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
             });
 
             return role;
         }
-        internal void ConstructLambdas() {
+        internal void ConstructLambdas(IDictionary<string, KeyValuePair<string, string>> metadata) {
             var lambdaOptions = new List<AirQualityLambdaOptions>();
             lambdaOptions.Add(new AirQualityLambdaOptions{
                 Name = Constants.DefaultAirQualityFeedProcessorLambdaName,
@@ -109,14 +112,16 @@ namespace AirQualityCdk
             var cities = new List<City>();
             cities.Add(new City {
                 Country = "mexico",
-                Name = "guadalajara",
-                Stations = new List<string>(new string[]{"vallarta", "tlaquepaque"})
+                Name = "jalisco", // guadalajara is also good
+                Stations = new List<string>(new string[]{"oblatos", "aguilas"})// these are good too {"vallarta", "tlaquepaque"})
                 });
 
             var envVarsWaqiGetCityFeed = new List<KeyValuePair<string, string>>();
             envVarsWaqiGetCityFeed.Add(new KeyValuePair<string, string>(
                 EnvCitiesWithStations.EnvironmentKey, EnvCitiesWithStations.GetValueFromCities(cities)));
             envVarsWaqiGetCityFeed.Add(new KeyValuePair<string, string>(Constants.EnvWaqiTokenKey, "replace_this_value"));
+            // add queueUrl as an environment variable
+            envVarsWaqiGetCityFeed.Add(metadata[Constants.EnvCityFeedSqsUrl]);
 
             lambdaOptions.Add(new AirQualityLambdaOptions{
                 Name = Constants.DefaultWaqiGetCityFeedLambdaName,

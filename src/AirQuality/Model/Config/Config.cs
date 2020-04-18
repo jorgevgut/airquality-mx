@@ -1,9 +1,18 @@
 using System.Collections.Generic;
 using System.Text.Json;
 
-namespace AirQualityCdk.Config
+namespace Latincoder.AirQuality.Model.Config
 {
-    public class City : Latincoder.AirQuality.Model.Config.City { }
+        public class City {
+
+        /// <summary>
+        /// each station value represents the sation uri used from waqi API
+        /// </summary>
+        /// <value></value>
+        public List<string> Stations { get; set; } = new List<string>();
+        public string Name { get; set; } = string.Empty;
+        public string Country { get; set; } = string.Empty;
+    }
 
     public class AirQualityLambdaOptions
     {
@@ -17,13 +26,5 @@ namespace AirQualityCdk.Config
         /// /// </summary>
         /// <value>List of City to support</value>
         public List<City> Cities { get; set; } = new List<City>(); // defaults to empty list
-    }
-
-    public static class EnvCitiesWithStations {
-        public readonly static string EnvironmentKey = Constants.EnvCitiesWaqiGetCityFeedLambda;
-
-        public static string GetValueFromCities(List<City> cities) {
-            return JsonSerializer.Serialize(cities);
-        }
     }
 }
