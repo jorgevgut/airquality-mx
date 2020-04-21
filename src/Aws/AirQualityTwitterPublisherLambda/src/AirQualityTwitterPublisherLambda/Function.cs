@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Tweetinvi;
+using Tweetinvi.Models;
 
 using Amazon.Lambda.Core;
 
@@ -25,6 +27,20 @@ namespace AirQualityTwitterPublisherLambda
             var receivedMessage = reader.ReadToEnd();
             System.Console.WriteLine("This is where twitter API integration will happen");
             System.Console.WriteLine(receivedMessage);
+            var apiKey = Environment.GetEnvironmentVariable("TWITTER_API_KEY");
+            var apiSecret = Environment.GetEnvironmentVariable("TWITTER_API_SECRET");
+            var token = Environment.GetEnvironmentVariable("TWITTER_ACCESS_TOKEN");
+            var tokenSecret = Environment.GetEnvironmentVariable("TWITTER_TOKEN_SECRET");
+            var credentials = new TwitterCredentials(apiKey, apiSecret, token, tokenSecret);
+            Auth.SetCredentials(credentials);
+
+            try {
+                var tweet = Auth.ExecuteOperationWithCredentials(credentials, () => Tweet.PublishTweet(receivedMessage));
+                System.Console.WriteLine($"Published tweet by {tweet.TweetDTO.CreatedBy.Name}");
+            } catch(Exception error) {
+                // TODO: if tweet fails publish to DLQ (SQS)
+                System.Console.WriteLine(error);
+            }
         }
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DocumentModel;
-using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.DynamoDBEvents;
 using Amazon.SimpleNotificationService;
@@ -9,7 +8,7 @@ using Amazon.SimpleNotificationService.Model;
 
 using Latincoder.AirQuality.Model.Dynamo;
 using Latincoder.AirQuality.Model.DTO;
-using System.Text.Json;
+using Latincoder.AirQuality.Services;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.LambdaJsonSerializer))]
@@ -34,9 +33,9 @@ namespace AirQualityFeedProcessorLambda
                 var dynamoDocument = Document.FromAttributeMap(record.Dynamodb.NewImage);
                 CityFeed feed = CityFeedDocument.ToDTO(dynamoDocument);
                 System.Console.WriteLine($"Accessed stream: {feed.CityName}");
-                var msg = JsonSerializer.Serialize<CityFeed>(feed);
+                var msg = NotificationFormatter.GetTwitterMessageSpanish(feed);
                 await publishToTwitter(msg);
-                await publishToGeneral(msg);
+                await publishToGeneral(NotificationFormatter.GetSimpleMessage(feed));
 
             }
         return "";
