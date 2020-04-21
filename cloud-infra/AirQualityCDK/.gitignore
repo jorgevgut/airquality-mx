@@ -1,6 +1,7 @@
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+./env-setup.sh
 
 # Created by https://www.gitignore.io/api/csharp
 
