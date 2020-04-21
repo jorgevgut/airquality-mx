@@ -40,6 +40,7 @@ namespace AirQualityCdk
             var cityFeedSqs = AirQualitySQS("CityFeedQueue");
             // SNS Topics
             var twitterPubSNS = new Topic(this, $"twitterPub-{Guid.NewGuid().ToString().Substring(0,10)}");
+            var generalPubSNS = new Topic(this, $"generalPub-{Guid.NewGuid().ToString().Substring(0,10)}");
 
             // Dynamo DB table
             var tableProps = new Dynamo.TableProps();
@@ -56,6 +57,7 @@ namespace AirQualityCdk
             metadata[Constants.EnvTwitterAPIKey] = KeyValuePair.Create(Constants.EnvTwitterAPIKey, "replace_this");
             metadata[Constants.EnvTwitterAPISecret] = KeyValuePair.Create(Constants.EnvTwitterAPISecret, "replace_this");
             metadata[Constants.EnvAirQualityTable] = KeyValuePair.Create(Constants.EnvAirQualityTable, airqualityTable.TableName);
+            metadata[Constants.EnvGeneralSNSTopic] = KeyValuePair.Create(Constants.EnvGeneralSNSTopic, generalPubSNS.TopicArn);
             // AWS lambdas
             // TODO: Lambda generation logic to be done using environment values. Config might also be pulled from S3
             // GetCityFeed lambda
@@ -204,6 +206,7 @@ namespace AirQualityCdk
             envVarsFeedProcessor.Add(metadata[Constants.EnvCityFeedSqsUrl]);
             envVarsFeedProcessor.Add(metadata[Constants.EnvTwitterSNS]);
             envVarsFeedProcessor.Add(metadata[Constants.EnvAirQualityTable]);
+            envVarsFeedProcessor.Add(metadata[Constants.EnvGeneralSNSTopic]);
             lambdaOptions.Add(new AirQualityLambdaOptions{
                 Name = Constants.DefaultAirQualityFeedProcessorLambdaName,
                 Handler = Constants.DefaultAirQualityFeedProcessorLambdaHandler,

@@ -21,6 +21,7 @@ namespace AirQualityCdk.Config
         public readonly static string EnvTwitterAPIKey = "TWITTER_APIK";
         public readonly static string EnvTwitterAPISecret = "TWITTER_APIS";
         public readonly static string EnvAirQualityTable = "TABLE_NAME";
+        public readonly static string EnvGeneralSNSTopic = "GENERAL_SNS_ARN";
 
         /* Values used for DynamoDB */
         public readonly static string DbAirQualityTableName = "airquality-mx-table";

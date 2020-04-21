@@ -12,7 +12,6 @@ using Latincoder.AirQuality.Services;
 
 using Amazon.Lambda.Core;
 using Amazon.SQS;
-using Amazon.SQS.Model;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
 
