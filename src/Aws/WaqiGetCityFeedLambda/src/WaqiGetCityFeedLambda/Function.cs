@@ -42,7 +42,7 @@ namespace WaqiGetCityFeedLambda
         /// <param name="input"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public async Task FunctionHandler(string input, ILambdaContext context)
+        public async Task FunctionHandler(System.IO.Stream input, ILambdaContext context)
         {
             _citiesRaw = Environment.GetEnvironmentVariable(EnvCitiesWaqiGetCityFeedLambda);
             _token = Environment.GetEnvironmentVariable(EnvWaqiTokenKey);
@@ -53,7 +53,7 @@ namespace WaqiGetCityFeedLambda
             await AsyncExecute(input, context);
         }
 
-        public async Task<string> AsyncExecute(string input, ILambdaContext context) {
+        public async Task<string> AsyncExecute(System.IO.Stream input, ILambdaContext context) {
                 _ = input; // discard
                 var waqiProxy = Waqi.create(_token);
                 var cities = JsonSerializer.Deserialize<List<Latincoder.AirQuality.Model.Config.City>>(_citiesRaw); // default C# serialization
@@ -112,7 +112,7 @@ namespace WaqiGetCityFeedLambda
                     var notificationIsNotSpam = NotificationValidator.CreateyValidator();
                     // spam means max aqi changed at least by 5 points, and is at least 20 minutes apart frm last notification
                     notificationIsNotSpam.AddRules(
-                        Rules.MinutesApartFrom(prevFeed, 20),
+                        Rules.MinutesApartFrom(prevFeed, 30),
                         Rules.AbsoluteAqiChangedBy(prevFeed, 5));
                     // urgent or meets criteria
                     if (notificationIsUrgent.MeetsGlobalCriteria(feed) && notificationIsNotSpam.MeetsGlobalCriteria(feed)) {

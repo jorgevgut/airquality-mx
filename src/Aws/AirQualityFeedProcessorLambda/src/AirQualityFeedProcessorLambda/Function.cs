@@ -32,10 +32,15 @@ namespace AirQualityFeedProcessorLambda
             foreach(var record in dynamoDBEvent.Records) {
                 var dynamoDocument = Document.FromAttributeMap(record.Dynamodb.NewImage);
                 CityFeed feed = CityFeedDocument.ToDTO(dynamoDocument);
+                if (feed == null) {
+                    System.Console.WriteLine("Streamed had no new data");
+                    continue;
+                    }
+                System.Console.WriteLine($"Feed Object:{feed}");
                 System.Console.WriteLine($"Accessed stream: {feed.CityName}");
                 var msg = NotificationFormatter.GetTwitterMessageSpanish(feed);
-                await publishToTwitter(msg);
                 await publishToGeneral(NotificationFormatter.GetSimpleMessage(feed));
+                await publishToTwitter(msg);
 
             }
         return "";
