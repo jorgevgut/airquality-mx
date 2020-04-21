@@ -21,9 +21,15 @@ namespace Latincoder.AirQuality.Model.DTO
                         select Attribution.From(waqiAttribution)).ToList();
         }
 
-        public string Name { get; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
 
-        public string Url   { get; } = string.Empty;
+        public string Url   { get; set; } = string.Empty;
+
+        public string GetNameOrDefault() {
+            if (Name != string.Empty) return Name;
+            if (Url != string.Empty) return Url;
+            return string.Empty;
+        }
 
         public override string ToString() {
             if (string.IsNullOrEmpty(Name) && string.IsNullOrEmpty(Url)) {

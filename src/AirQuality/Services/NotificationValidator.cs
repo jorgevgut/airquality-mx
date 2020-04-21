@@ -106,7 +106,7 @@ namespace Latincoder.AirQuality.Services
         public static Predicate<CityFeed> MinutesApartFrom(CityFeed prevFeed, int minutes) {
             return feed => {
                     if (prevFeed == null) { return true; }
-                    return prevFeed.UpdatedAt.AddMinutes(minutes).CompareTo(feed) > 0;
+                    return prevFeed.UpdatedAt.AddMinutes(minutes).CompareTo(feed) < 0;
                 };
         }
 

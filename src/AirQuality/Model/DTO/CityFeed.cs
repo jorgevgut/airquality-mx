@@ -10,7 +10,6 @@ namespace Latincoder.AirQuality.Model.DTO
     public class CityFeed
     {
         private const int AqiNotAvailable = -1;
-        private Station _maxAqiStation;
 
         /* Constructor methods*/
         internal CityFeed() {}
@@ -18,10 +17,6 @@ namespace Latincoder.AirQuality.Model.DTO
         public CityFeed(List<Station> stations, string cityName) {
             Stations = stations;
             CityName = cityName;
-            _maxAqiStation = (from station in stations
-                        where station.AQI > AqiNotAvailable
-                        orderby station.AQI descending
-                        select station).FirstOrDefault();
         }
 
 
@@ -40,27 +35,26 @@ namespace Latincoder.AirQuality.Model.DTO
 
             return new CityFeed {
                 Stations = stations.ToList(),
-                CityName = CityFeed.findBestCityName(stations.ToList()),
-                _maxAqiStation = (from station in stations
-                        orderby station.AQI descending
-                        select station).First()
+                CityName = CityFeed.findBestCityName(stations.ToList())
             };
         }
 
         /* Properties */
-        public string UpdatedAtText { get =>  _maxAqiStation != null? _maxAqiStation.Time: string.Empty; }
+        public string UpdatedAtText { get =>  MaxAqiStation != null? MaxAqiStation.Time: string.Empty; }
 
         // _maxAqiStation.Time is guaranteed to be a valid DateTime, hence rely on Parse()
-        public DateTime UpdatedAt { get => _maxAqiStation != null ? DateTime.Parse(_maxAqiStation.Time): DateTime.Now; }
+        public DateTime UpdatedAt { get => MaxAqiStation != null ? DateTime.Parse(MaxAqiStation.Time): DateTime.Now; }
         public string CityName { get; set; } = string.Empty;
 
         // TODO: accessing MaxAqiStation is O(n) - cache result in private field
-        public int MaxAQI { get => _maxAqiStation !=null? _maxAqiStation.AQI:-1; }
+        public int MaxAQI { get => MaxAqiStation !=null? MaxAqiStation.AQI:-1; }
 
         public List<Station> Stations { get; set; }
 
         // TODO: accessing MaxAqiStation is O(n) - cache result in private field
-        public Station MaxAqiStation { get => _maxAqiStation; }
+        public Station MaxAqiStation { get => (from station in Stations
+                        orderby station.AQI descending
+                        select station).First(); }
 
         /*
             internal methods - validations and utilities of this  class
