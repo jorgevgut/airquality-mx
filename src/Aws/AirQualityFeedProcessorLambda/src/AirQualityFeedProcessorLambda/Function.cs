@@ -12,7 +12,7 @@ namespace AirQualityFeedProcessorLambda
 {
     public class Function
     {
-        
+
         /// <summary>
         /// A simple function that takes a string and does a ToUpper
         /// </summary>
@@ -21,6 +21,8 @@ namespace AirQualityFeedProcessorLambda
         /// <returns></returns>
         public string FunctionHandler(string input, ILambdaContext context)
         {
+            System.Console.WriteLine("Triggered lambda");
+            System.Console.WriteLine(input);
             return input?.ToUpper();
         }
     }

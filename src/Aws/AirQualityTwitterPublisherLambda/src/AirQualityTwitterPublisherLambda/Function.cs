@@ -12,7 +12,7 @@ namespace AirQualityTwitterPublisherLambda
 {
     public class Function
     {
-        
+
         /// <summary>
         /// A simple function that takes a string and does a ToUpper
         /// </summary>
@@ -21,6 +21,7 @@ namespace AirQualityTwitterPublisherLambda
         /// <returns></returns>
         public string FunctionHandler(string input, ILambdaContext context)
         {
+            System.Console.WriteLine("This is where twitter API integration will happen");
             return input?.ToUpper();
         }
     }

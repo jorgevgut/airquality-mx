@@ -17,6 +17,14 @@ namespace AirQualityCdk.Config
         public readonly static string EnvCitiesWaqiGetCityFeedLambda = "CITIES";
         public readonly static string EnvWaqiTokenKey = "TOKEN";
         public readonly static string EnvCityFeedSqsUrl = "CITYFEED_SQS_URL";
+        public readonly static string EnvTwitterSNS = "TWITTER_SNS_ARN";
+        public readonly static string EnvTwitterAPIKey = "TWITTER_APIK";
+        public readonly static string EnvTwitterAPISecret = "TWITTER_APIS";
+        public readonly static string EnvAirQualityTable = "TABLE_NAME";
+
+        /* Values used for DynamoDB */
+        public readonly static string DbAirQualityTableName = "airquality-mx-table";
+        public readonly static string DbPartitionKeyName = "country-cityName"; // only one record associated with coutry/city used for Dynamo's internal hash
 
     }
 }

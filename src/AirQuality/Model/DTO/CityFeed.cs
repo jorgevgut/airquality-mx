@@ -3,6 +3,7 @@ using Latincoder.AirQuality.Model.External;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.Json;
+using System;
 
 namespace Latincoder.AirQuality.Model.DTO
 {
@@ -34,6 +35,7 @@ namespace Latincoder.AirQuality.Model.DTO
                                 isNumber ? aqi.GetInt32() : AqiNotAvailable,
                                 station.Data.City.Name,
                                 station.Data.City.Url,
+                                station.Data.TimeStr,
                                 Attribution.ListFrom(station.Data.Attributions));
 
             return new CityFeed {
@@ -46,6 +48,10 @@ namespace Latincoder.AirQuality.Model.DTO
         }
 
         /* Properties */
+        public string UpdatedAtText { get => _maxAqiStation.Time; }
+
+        // _maxAqiStation.Time is guaranteed to be a valid DateTime, hence rely on Parse()
+        public DateTime UpdatedAt { get => DateTime.Parse(_maxAqiStation.Time); }
         public string CityName { get; set; }
 
         // TODO: accessing MaxAqiStation is O(n) - cache result in private field

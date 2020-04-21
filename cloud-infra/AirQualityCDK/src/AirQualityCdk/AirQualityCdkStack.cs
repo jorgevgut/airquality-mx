@@ -1,7 +1,11 @@
 using Amazon.CDK;
+using Dynamo  = Amazon.CDK.AWS.DynamoDB;
 using Amazon.CDK.AWS.Events;
+using Amazon.CDK.AWS.Events.Targets;
 using Amazon.CDK.AWS.Lambda;
+using Amazon.CDK.AWS.Lambda.EventSources;
 using Amazon.CDK.AWS.SNS;
+using Amazon.CDK.AWS.SNS.Subscriptions;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.SQS;
 using Amazon.CDK.AWS.S3;
@@ -29,22 +33,54 @@ namespace AirQualityCdk
             var metadata = new Dictionary<string, KeyValuePair<string, string>>();
             // The code that defines your stack goes here
             // SNS Topics
-            new Topic(this, "TwitterNotificationPublisher");
+            var topicTwitter = new Topic(this, "TwitterNotificationPublisher");
             new Topic(this, "EmailNotificationPublisher");
 
             // SQS queues
             var cityFeedSqs = AirQualitySQS("CityFeedQueue");
-            metadata[Constants.EnvCityFeedSqsUrl] = KeyValuePair.Create(Constants.EnvCityFeedSqsUrl, cityFeedSqs.QueueUrl);
+            // SNS Topics
+            var twitterPubSNS = new Topic(this, $"twitterPub-{Guid.NewGuid().ToString().Substring(0,10)}");
 
+            // Dynamo DB table
+            var tableProps = new Dynamo.TableProps();
+            tableProps.TableName = Constants.DbAirQualityTableName;
+            var primaryKey = new Dynamo.Attribute{Name = Constants.DbPartitionKeyName, Type = Dynamo.AttributeType.STRING };
+            tableProps.BillingMode = Dynamo.BillingMode.PAY_PER_REQUEST; // on-demand pricing
+            tableProps.PartitionKey = primaryKey;
+            tableProps.Stream = Dynamo.StreamViewType.NEW_IMAGE;
+            var airqualityTable = new Dynamo.Table(this, Constants.DbAirQualityTableName, tableProps);
+
+            //Environment value metadata for lambda creation
+            metadata[Constants.EnvCityFeedSqsUrl] = KeyValuePair.Create(Constants.EnvCityFeedSqsUrl, cityFeedSqs.QueueUrl);
+            metadata[Constants.EnvTwitterSNS] = KeyValuePair.Create(Constants.EnvTwitterSNS, twitterPubSNS.TopicArn);
+            metadata[Constants.EnvTwitterAPIKey] = KeyValuePair.Create(Constants.EnvTwitterAPIKey, "replace_this");
+            metadata[Constants.EnvTwitterAPISecret] = KeyValuePair.Create(Constants.EnvTwitterAPISecret, "replace_this");
+            metadata[Constants.EnvAirQualityTable] = KeyValuePair.Create(Constants.EnvAirQualityTable, airqualityTable.TableName);
             // AWS lambdas
             // TODO: Lambda generation logic to be done using environment values. Config might also be pulled from S3
             // GetCityFeed lambda
-            ConstructLambdas(metadata);
+            var functionsByName = ConstructLambdas(metadata);
 
-            // Event schedule
+            // subscribe and configure
+            // find twitter publisher lambda
+
+            topicTwitter.AddSubscription(new LambdaSubscription(functionsByName
+                    .Where(pair => pair.Key.Contains(Constants.DefaultAirQualityTwitterPublisherLambdaName))
+                    .Single().Value));
+
+            // trigger feed processor lambda only on dynamo db stream change by coutry-city feed
+            functionsByName
+                    .Where(pair => pair.Key.Contains(Constants.DefaultAirQualityFeedProcessorLambdaName))
+                    .Single().Value.AddEventSource(new DynamoEventSource(airqualityTable,new DynamoEventSourceProps()));
+
+            // Event schedule every 15 mins - // architecture targets 5, change when tested and working
+            var waqiLambda = functionsByName
+                    .Where(pair => pair.Key.Contains(Constants.DefaultWaqiGetCityFeedLambdaName))
+                    .Single().Value;
+            var targetWaqiLambda =  new LambdaFunction(waqiLambda);
             new Rule(this, "Waqi5min", new RuleProps{
-                Schedule = Schedule.Rate(Duration.Minutes(5))
-            });
+                Schedule = Schedule.Rate(Duration.Minutes(15))
+            }).AddTarget(targetWaqiLambda);
         }
 
         /// <summary>
@@ -57,6 +93,7 @@ namespace AirQualityCdk
         {
             var properties = new FunctionProps();
             properties.Runtime = Runtime.DOTNET_CORE_3_1;
+            properties.Timeout = Duration.Seconds(20); // ensures max 20 sec duration
             // ensures unique Function names - use substring because of 64 character name limit
             var functionName = $"{name}-{Guid.NewGuid().ToString().Substring(0,12)}";
             properties.FunctionName = functionName;
@@ -74,7 +111,7 @@ namespace AirQualityCdk
             // Look into picking up from asset in the future
             //Code.FromAsset(System.Environment.GetEnvironmentVariable("AirQualityhandlerPath"));
             properties.Handler = handler;
-            properties.Role = LambdaAirRole(functionName); // pass in unique function name
+            properties.Role = LambdaAirRole(); // pass in unique function name singleton
             return new Function(this, name, properties);
         }
 
@@ -84,20 +121,22 @@ namespace AirQualityCdk
             return new Queue(this, name, props);
         }
 
-        internal Role LambdaAirRole(string name) {
-
+        private Role _role = null;
+        internal  Role LambdaAirRole() {
+            if (_role != null) { return _role; }
             // TODO: create roles with required permissions
-            var role = new Role(this, $"lrole-{Guid.NewGuid().ToString()}", new RoleProps{
+            _role = new Role(this, $"lrole-{Guid.NewGuid().ToString()}", new RoleProps{
                 RoleName = $"lrole-{Guid.NewGuid().ToString()}",
                 Description = @"THis is role is to be used by lambda functions within AirQuality project",
                 AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
             });
             // Adding permissions
-            role.AddToPolicy(SQSFullAccess);
-            role.AddToPolicy(SNSFullAccess);
-            role.AddToPolicy(LambdaFullAccess);
-            role.AddToPolicy(DynamoFullAccess);
-            return role;
+            _role.AddToPolicy(SQSFullAccess);
+            _role.AddToPolicy(SNSFullAccess);
+            _role.AddToPolicy(LambdaFullAccess);
+            _role.AddToPolicy(DynamoFullAccess);
+            _role.AddToPolicy(CloudWatchFullAccess);
+            return _role;
         }
 
         /*
@@ -114,10 +153,15 @@ namespace AirQualityCdk
             return new PolicyStatement(policyProps);
             }
         }
+
+        /// <summary>
+        /// Access to cloudwatch actions, creation of loggroups and log publishing
+        /// </summary>
+        /// <value></value>
         internal PolicyStatement CloudWatchFullAccess {
             get {
             var policyProps = new PolicyStatementProps();
-            policyProps.Actions = new string[]{"cloudwatch:*"};
+            policyProps.Actions = new string[]{"cloudwatch:*", "logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"};
             policyProps.Effect = Effect.ALLOW;
             policyProps.Resources = new string[]{"*"};
             return new PolicyStatement(policyProps);
@@ -154,16 +198,26 @@ namespace AirQualityCdk
             }
         }
 
-        internal void ConstructLambdas(IDictionary<string, KeyValuePair<string, string>> metadata) {
+        internal List<KeyValuePair<string, Function>> ConstructLambdas(IDictionary<string, KeyValuePair<string, string>> metadata) {
             var lambdaOptions = new List<AirQualityLambdaOptions>();
+            var envVarsFeedProcessor = new List<KeyValuePair<string, string>>();
+            envVarsFeedProcessor.Add(metadata[Constants.EnvCityFeedSqsUrl]);
+            envVarsFeedProcessor.Add(metadata[Constants.EnvTwitterSNS]);
+            envVarsFeedProcessor.Add(metadata[Constants.EnvAirQualityTable]);
             lambdaOptions.Add(new AirQualityLambdaOptions{
                 Name = Constants.DefaultAirQualityFeedProcessorLambdaName,
-                Handler = Constants.DefaultAirQualityFeedProcessorLambdaHandler
+                Handler = Constants.DefaultAirQualityFeedProcessorLambdaHandler,
+                EnvironmentVariables = envVarsFeedProcessor
             });
 
+            var envVarsTwitterPublisher = new List<KeyValuePair<string, string>>();
+            envVarsTwitterPublisher.Add(metadata[Constants.EnvTwitterSNS]);
+            envVarsTwitterPublisher.Add(metadata[Constants.EnvTwitterAPIKey]);
+            envVarsTwitterPublisher.Add(metadata[Constants.EnvTwitterAPISecret]);
             lambdaOptions.Add(new AirQualityLambdaOptions{
                 Name = Constants.DefaultAirQualityTwitterPublisherLambdaName,
-                Handler = Constants.DefaultAirQualityTwitterPublisherLambdaHandler
+                Handler = Constants.DefaultAirQualityTwitterPublisherLambdaHandler,
+                EnvironmentVariables = envVarsTwitterPublisher
             });
 
 
@@ -172,7 +226,12 @@ namespace AirQualityCdk
             cities.Add(new City {
                 Country = "mexico",
                 Name = "jalisco", // guadalajara is also good
-                Stations = new List<string>(new string[]{"oblatos", "aguilas"})// these are good too {"vallarta", "tlaquepaque"})
+                Stations = new List<string>(new string[]{"oblatos", "aguilas"})
+                });
+            cities.Add(new City {
+                Country = "mexico",
+                Name = "guadalajara",
+                Stations = new List<string>(new string[]{"vallarta", "tlaquepaque"})
                 });
 
             var envVarsWaqiGetCityFeed = new List<KeyValuePair<string, string>>();
@@ -181,6 +240,7 @@ namespace AirQualityCdk
             envVarsWaqiGetCityFeed.Add(new KeyValuePair<string, string>(Constants.EnvWaqiTokenKey, "replace_this_value"));
             // add queueUrl as an environment variable
             envVarsWaqiGetCityFeed.Add(metadata[Constants.EnvCityFeedSqsUrl]);
+            envVarsWaqiGetCityFeed.Add(metadata[Constants.EnvAirQualityTable]);
 
             lambdaOptions.Add(new AirQualityLambdaOptions{
                 Name = Constants.DefaultWaqiGetCityFeedLambdaName,
@@ -191,9 +251,11 @@ namespace AirQualityCdk
             // to reduce operational load lambdas within AirQuality project share roles and permissions
             // they should be managed by modifying Name, Handler and EnvVars.
             // TODO: Need to work on options for event actions that trigger these lambdas might change constructor
-            lambdaOptions.ForEach(options => {
-                CreateAirQualityLambda(options.Name, options.Handler, options.EnvironmentVariables);
-            });
+            var functionByName = from lambda in lambdaOptions
+                    let function = CreateAirQualityLambda(lambda.Name, lambda.Handler, lambda.EnvironmentVariables)
+                    group function by lambda.Name;
+            return (from f in functionByName
+             select KeyValuePair.Create<string, Function>(f.Key, f.FirstOrDefault())).ToList();
         }
     }
 }
