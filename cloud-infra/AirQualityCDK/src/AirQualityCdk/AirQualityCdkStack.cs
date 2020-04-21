@@ -53,8 +53,10 @@ namespace AirQualityCdk
             //Environment value metadata for lambda creation
             metadata[Constants.EnvCityFeedSqsUrl] = KeyValuePair.Create(Constants.EnvCityFeedSqsUrl, cityFeedSqs.QueueUrl);
             metadata[Constants.EnvTwitterSNS] = KeyValuePair.Create(Constants.EnvTwitterSNS, twitterPubSNS.TopicArn);
-            metadata[Constants.EnvTwitterAPIKey] = KeyValuePair.Create(Constants.EnvTwitterAPIKey, "replace_this");
-            metadata[Constants.EnvTwitterAPISecret] = KeyValuePair.Create(Constants.EnvTwitterAPISecret, "replace_this");
+            metadata[Constants.EnvTwitterAPIKey] = KeyValuePair.Create(Constants.EnvTwitterAPIKey, System.Environment.GetEnvironmentVariable(Constants.EnvTwitterAPIKey));
+            metadata[Constants.EnvTwitterAPISecret] = KeyValuePair.Create(Constants.EnvTwitterAPISecret, System.Environment.GetEnvironmentVariable(Constants.EnvTwitterAPISecret));
+            metadata[Constants.EnvTwitterAccessToken] = KeyValuePair.Create(Constants.EnvTwitterAccessToken, System.Environment.GetEnvironmentVariable(Constants.EnvTwitterAccessToken));
+            metadata[Constants.EnvTwitterTokenSecret] = KeyValuePair.Create(Constants.EnvTwitterTokenSecret, System.Environment.GetEnvironmentVariable(Constants.EnvTwitterTokenSecret));
             metadata[Constants.EnvAirQualityTable] = KeyValuePair.Create(Constants.EnvAirQualityTable, airqualityTable.TableName);
             metadata[Constants.EnvGeneralSNSTopic] = KeyValuePair.Create(Constants.EnvGeneralSNSTopic, generalPubSNS.TopicArn);
             // AWS lambdas
@@ -216,6 +218,8 @@ namespace AirQualityCdk
             envVarsTwitterPublisher.Add(metadata[Constants.EnvTwitterSNS]);
             envVarsTwitterPublisher.Add(metadata[Constants.EnvTwitterAPIKey]);
             envVarsTwitterPublisher.Add(metadata[Constants.EnvTwitterAPISecret]);
+            envVarsTwitterPublisher.Add(metadata[Constants.EnvTwitterAccessToken]);
+            envVarsTwitterPublisher.Add(metadata[Constants.EnvTwitterTokenSecret]);
             lambdaOptions.Add(new AirQualityLambdaOptions{
                 Name = Constants.DefaultAirQualityTwitterPublisherLambdaName,
                 Handler = Constants.DefaultAirQualityTwitterPublisherLambdaHandler,
@@ -239,7 +243,7 @@ namespace AirQualityCdk
             var envVarsWaqiGetCityFeed = new List<KeyValuePair<string, string>>();
             envVarsWaqiGetCityFeed.Add(new KeyValuePair<string, string>(
                 EnvCitiesWithStations.EnvironmentKey, EnvCitiesWithStations.GetValueFromCities(cities)));
-            envVarsWaqiGetCityFeed.Add(new KeyValuePair<string, string>(Constants.EnvWaqiTokenKey, "replace_this_value"));
+            envVarsWaqiGetCityFeed.Add(new KeyValuePair<string, string>(Constants.EnvWaqiTokenKey, System.Environment.GetEnvironmentVariable(Constants.EnvWaqiTokenKey)));
             // add queueUrl as an environment variable
             envVarsWaqiGetCityFeed.Add(metadata[Constants.EnvCityFeedSqsUrl]);
             envVarsWaqiGetCityFeed.Add(metadata[Constants.EnvAirQualityTable]);

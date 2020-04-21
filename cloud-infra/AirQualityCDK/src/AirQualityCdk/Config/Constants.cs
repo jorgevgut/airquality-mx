@@ -20,6 +20,8 @@ namespace AirQualityCdk.Config
         public readonly static string EnvTwitterSNS = "TWITTER_SNS_ARN";
         public readonly static string EnvTwitterAPIKey = "TWITTER_APIK";
         public readonly static string EnvTwitterAPISecret = "TWITTER_APIS";
+        public readonly static string EnvTwitterAccessToken = "TWITTER_ACCESS_TOKEN";
+        public readonly static string EnvTwitterTokenSecret = "TWITTER_SECRET_TOKEN";
         public readonly static string EnvAirQualityTable = "TABLE_NAME";
         public readonly static string EnvGeneralSNSTopic = "GENERAL_SNS_ARN";
 
