@@ -51,7 +51,7 @@ namespace Latincoder.AirQuality.Model.Dynamo
             if (doc.ContainsKey(JsonValue)) {
                 return JsonSerializer.Deserialize<CityFeed>(doc[JsonValue].AsString());
             }
-            return null;
+            return new CityFeed();
         }
 
     }

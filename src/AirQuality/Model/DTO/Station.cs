@@ -5,6 +5,9 @@ namespace Latincoder.AirQuality.Model.DTO
 {
     public class Station {
 
+        public Station() {
+            Id = Guid.NewGuid().ToString();
+        }
         public Station(string id) {
             Id = id;
         }
@@ -37,7 +40,7 @@ namespace Latincoder.AirQuality.Model.DTO
 
         public string Url { get; set; }
 
-        public string Time { get; set; }
+        public string Time { get; set; } = DateTime.Now.ToString();
 
         public List<Attribution> Attributions { get; set; }
     }

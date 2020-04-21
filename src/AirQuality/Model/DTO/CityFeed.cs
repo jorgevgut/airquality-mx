@@ -48,14 +48,14 @@ namespace Latincoder.AirQuality.Model.DTO
         }
 
         /* Properties */
-        public string UpdatedAtText { get => _maxAqiStation.Time; }
+        public string UpdatedAtText { get =>  _maxAqiStation != null? _maxAqiStation.Time: string.Empty; }
 
         // _maxAqiStation.Time is guaranteed to be a valid DateTime, hence rely on Parse()
-        public DateTime UpdatedAt { get => DateTime.Parse(_maxAqiStation.Time); }
-        public string CityName { get; set; }
+        public DateTime UpdatedAt { get => _maxAqiStation != null ? DateTime.Parse(_maxAqiStation.Time): DateTime.Now; }
+        public string CityName { get; set; } = string.Empty;
 
         // TODO: accessing MaxAqiStation is O(n) - cache result in private field
-        public int MaxAQI { get => _maxAqiStation.AQI; }
+        public int MaxAQI { get => _maxAqiStation !=null? _maxAqiStation.AQI:-1; }
 
         public List<Station> Stations { get; set; }
 

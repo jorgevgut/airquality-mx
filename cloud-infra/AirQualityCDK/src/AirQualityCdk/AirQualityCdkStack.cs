@@ -33,7 +33,6 @@ namespace AirQualityCdk
             var metadata = new Dictionary<string, KeyValuePair<string, string>>();
             // The code that defines your stack goes here
             // SNS Topics
-            var topicTwitter = new Topic(this, "TwitterNotificationPublisher");
             new Topic(this, "EmailNotificationPublisher");
 
             // SQS queues
@@ -66,7 +65,7 @@ namespace AirQualityCdk
             // subscribe and configure
             // find twitter publisher lambda
 
-            topicTwitter.AddSubscription(new LambdaSubscription(functionsByName
+            twitterPubSNS.AddSubscription(new LambdaSubscription(functionsByName
                     .Where(pair => pair.Key.Contains(Constants.DefaultAirQualityTwitterPublisherLambdaName))
                     .Single().Value));
 

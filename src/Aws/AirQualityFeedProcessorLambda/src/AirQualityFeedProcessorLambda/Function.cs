@@ -5,6 +5,7 @@ using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.DynamoDBEvents;
 using Amazon.SimpleNotificationService;
+using Amazon.SimpleNotificationService.Model;
 
 using Latincoder.AirQuality.Model.Dynamo;
 using Latincoder.AirQuality.Model.DTO;
@@ -25,28 +26,29 @@ namespace AirQualityFeedProcessorLambda
         /// <param name="input"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public string FunctionHandler(DynamoDBEvent dynamoDBEvent, ILambdaContext context)
+        public async Task<string> FunctionHandler(DynamoDBEvent dynamoDBEvent, ILambdaContext context)
         {
             snsClient = new AmazonSimpleNotificationServiceClient();
 
             foreach(var record in dynamoDBEvent.Records) {
                 var dynamoDocument = Document.FromAttributeMap(record.Dynamodb.NewImage);
                 CityFeed feed = CityFeedDocument.ToDTO(dynamoDocument);
-                System.Console.WriteLine($"Accessed stream: {feed}");
-                var msg = JsonSerializer.Serialize(feed);
-                publishToTwitter(msg);
+                System.Console.WriteLine($"Accessed stream: {feed.CityName}");
+                var msg = JsonSerializer.Serialize<CityFeed>(feed);
+                await publishToTwitter(msg);
+                await publishToGeneral(msg);
 
             }
         return "";
         }
-        public void publishToTwitter(string message) {
+        public Task<PublishResponse> publishToTwitter(string message) {
             var arn = Environment.GetEnvironmentVariable("TWITTER_SNS_ARN");
-            snsClient.PublishAsync(arn, message);
+            return snsClient.PublishAsync(arn, message);
         }
 
-        public void publishToGeneral(string message) {
+        public Task<PublishResponse> publishToGeneral(string message) {
             var arn = Environment.GetEnvironmentVariable("GENERAL_SNS_ARN");
-            snsClient.PublishAsync(arn, message);
+            return snsClient.PublishAsync(arn, message);
         }
     }
 }
