@@ -25,6 +25,17 @@ namespace AirQualityTwitterPublisherLambda
             }
             return !string.IsNullOrEmpty(msg);
         }
+
+        public ITwitterCredentials GetCredentials() {
+
+            var apiKey = Environment.GetEnvironmentVariable("TWITTER_APIK");
+            var apiSecret = Environment.GetEnvironmentVariable("TWITTER_APIS");
+            var token = Environment.GetEnvironmentVariable("TWITTER_ACCESS_TOKEN");
+            var tokenSecret = Environment.GetEnvironmentVariable("TWITTER_SECRET_TOKEN");
+            var credentials = new TwitterCredentials(apiKey, apiSecret, token, tokenSecret);
+
+            return credentials;
+        }
         /// <summary>
         /// A simple function that takes a string and does a ToUpper
         /// </summary>
@@ -33,12 +44,9 @@ namespace AirQualityTwitterPublisherLambda
         /// <returns></returns>
         public System.Threading.Tasks.Task<string> FunctionHandler(SNSEvent snsEvent, ILambdaContext context)
         {
-            var apiKey = Environment.GetEnvironmentVariable("TWITTER_APIK");
-            var apiSecret = Environment.GetEnvironmentVariable("TWITTER_APIS");
-            var token = Environment.GetEnvironmentVariable("TWITTER_ACCESS_TOKEN");
-            var tokenSecret = Environment.GetEnvironmentVariable("TWITTER_SECRET_TOKEN");
-            var credentials = Auth.CreateCredentials(apiKey, apiSecret, token, tokenSecret);
-            Auth.SetUserCredentials(apiKey, apiSecret, token, tokenSecret);
+            var credentials = GetCredentials();
+
+            //Auth.SetUserCredentials(apiKey, apiSecret, token, tokenSecret);
             // TweetInvi lacks returning asynchronous types that can be awaited
             var publisher = User.GetAuthenticatedUser(credentials);
 
