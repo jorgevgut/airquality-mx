@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text;
 using Latincoder.AirQuality.Model.DTO;
 
 namespace Latincoder.AirQuality.Services
@@ -33,21 +34,19 @@ namespace Latincoder.AirQuality.Services
             var attributions = from attr in feed.MaxAqiStation.Attributions
                                let attributionMsg = attr.GetNameOrDefault()
                                select attributionMsg;
-            var attrText = string.Concat("Fuente:\n",
-                attributions.Aggregate((prev, current) => string.Concat(prev, "\n", current)));
+            var encodedText = Encoding.Default.GetBytes(string.Concat("Fuente:\n",
+                attributions.Aggregate((prev, current) => string.Concat(prev, "\n", current))));
+            var attrText = Encoding.UTF8.GetString(encodedText);
             // how many characters do we have left?
             charactersLeft -= attrText.Length;
+            var followText = $"#airemx-{feed.CityName}";
             if (charactersLeft < 200) {
                 var custom = getQuality(feed.MaxAQI) == Quality.Good ? "Es momento de respirar" : "Mantenga sus precauciones";
-                return $"{custom} en {feed.CityName} calidad del aire es {getScaleSpanish(feed.MaxAQI)}(Indice Calidad:{feed.MaxAQI}) reportado por la estacion {feed.MaxAqiStation.Name})\n{attrText}";
-            }
-
-            if (charactersLeft < 150) {
-                return $"En {feed.CityName} calidad del aire es {getScaleSpanish(feed.MaxAQI)}(Indice Calidad:{feed.MaxAQI}) (estacion {feed.MaxAqiStation.Name})\n{attrText}";
+                return $"Calidad del aire en {feed.CityName.ToUpper()} es {getScaleSpanish(feed.MaxAQI)}\nIndice AQI:{feed.MaxAQI}) segun Estacion {feed.MaxAqiStation.Name})\n{attrText}\n{followText}";
             }
 
             // attempt to send this message
-            return $"En {feed.CityName} calidad del aire es {feed.MaxAQI} (estacion {feed.MaxAqiStation.Name})\n{attrText}";
+            return $"La calidad del aire en {feed.CityName} es {feed.MaxAQI} (estacion {feed.MaxAqiStation.Name})\n{attrText}\n{followText}";
         }
 
         public static string GetSimpleMessage(CityFeed feed) {
