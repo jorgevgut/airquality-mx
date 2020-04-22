@@ -82,7 +82,7 @@ namespace AirQualityCdk
                     .Single().Value;
             var targetWaqiLambda =  new LambdaFunction(waqiLambda);
             new Rule(this, "Waqi5min", new RuleProps{
-                Schedule = Schedule.Rate(Duration.Minutes(15))
+                Schedule = Schedule.Rate(Duration.Minutes(5))
             }).AddTarget(targetWaqiLambda);
         }
 
