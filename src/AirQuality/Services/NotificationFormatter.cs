@@ -1,6 +1,8 @@
 using System.Linq;
 using System.Text;
+using System.Web;
 using Latincoder.AirQuality.Model.DTO;
+
 
 namespace Latincoder.AirQuality.Services
 {
@@ -34,19 +36,22 @@ namespace Latincoder.AirQuality.Services
             var attributions = from attr in feed.MaxAqiStation.Attributions
                                let attributionMsg = attr.GetNameOrDefault()
                                select attributionMsg;
-            var encodedText = Encoding.Default.GetBytes(string.Concat("Fuente:\n",
-                attributions.Aggregate((prev, current) => string.Concat(prev, "\n", current))));
-            var attrText = Encoding.UTF8.GetString(encodedText);
+            var encodedText = string.Concat("Fuente:\n",
+                attributions.Aggregate((prev, current) => string.Concat(prev, "\n", current)));
+            var attrText = HttpUtility.HtmlDecode(encodedText);
             // how many characters do we have left?
             charactersLeft -= attrText.Length;
-            var followText = $"#airemx-{feed.CityName}";
+            var pascalCity = new StringBuilder().Append(char.ToUpper(feed.CityName[0]))
+                                                .Append(feed.CityName.Substring(1))
+                                                .ToString();
+            var followText = $"#aireEn{pascalCity}";
             if (charactersLeft < 200) {
                 var custom = getQuality(feed.MaxAQI) == Quality.Good ? "Es momento de respirar" : "Mantenga sus precauciones";
-                return $"Calidad del aire en {feed.CityName.ToUpper()} es {getScaleSpanish(feed.MaxAQI)}\nIndice AQI:{feed.MaxAQI}) segun Estacion {feed.MaxAqiStation.Name})\n{attrText}\n{followText}";
+                return $"Calidad del aire en {pascalCity} es {getScaleSpanish(feed.MaxAQI)}\nIndice AQI:{feed.MaxAQI} segun Estacion \"{feed.MaxAqiStation.Name}\")\n\n{attrText}\n{followText}";
             }
 
             // attempt to send this message
-            return $"La calidad del aire en {feed.CityName} es {feed.MaxAQI} (estacion {feed.MaxAqiStation.Name})\n{attrText}\n{followText}";
+            return $"La calidad del aire en {pascalCity} es {feed.MaxAQI} (estacion {feed.MaxAqiStation.Name})\n{attrText}\n{followText}";
         }
 
         public static string GetSimpleMessage(CityFeed feed) {

@@ -11,6 +11,7 @@ using Amazon.CDK.AWS.SQS;
 using Amazon.CDK.AWS.S3;
 
 using System;
+using System.Text.Json;
 using System.Linq;
 using System.Collections.Generic;
 using AirQualityCdk.Config;
@@ -229,15 +230,22 @@ namespace AirQualityCdk
 
             // config for Lambda to gather information from WAQI's API
             var cities = new List<City>();
+            // jsons where obtained manually using a Postman script
+            cities.Add(JsonSerializer.Deserialize<City>("{\"Country\":\"mexico\",\"Name\":\"nuevo-leon\",\"Stations\":[\"san-nicolas\",\"s.-pedro\",\"obispado\",\"monterrey/universidad\",\"monterrey/cadereyta\",\"monterrey/pueblo-serena\"]}"));
+            cities.Add(JsonSerializer.Deserialize<City>("{\"Country\":\"mexico\",\"Name\":\"mexico\",\"Stations\":[\"miguel-hidalgo\",\"gustavo-a.-madero\",\"uam-iztapalapa\",\"benito-juarez\",\"merced\",\"fes-aragon\",\"iztacalco\",\"hospital-general-de-mexico\",\"coyoacan\",\"san-juan-de-aragon\",\"camarones\"]}"));
+            cities.Add(JsonSerializer.Deserialize<City>("{\"Country\":\"mexico\",\"Name\":\"mexico\",\"Stations\":[\"pedregal\",\"ajusco-medio\",\"santiago-acahualtepec\",\"tlalnepantla\",\"tlahuac\"]}"));
+            cities.Add(JsonSerializer.Deserialize<City>("{\"Country\":\"mexico\",\"Name\":\"veracruz\",\"Stations\":[\"xalapa/stps\",\"minatitlan/tecnologico\",\"poza-rica/universidad-veracruzana\"]}"));
+            cities.Add(JsonSerializer.Deserialize<City>("{\"Country\":\"mexico\",\"Name\":\"veracruz\",\"Stations\":[\"poza-rica/universidad-veracruzana\"]}"));
+            cities.Add(JsonSerializer.Deserialize<City>("{\"Country\":\"mexico\",\"Name\":\"baja-california\",\"Stations\":[\"tijuana/laboratorio\"]}"));
+            cities.Add(JsonSerializer.Deserialize<City>("{\"Country\":\"mexico\",\"Name\":\"guanajuato\",\"Stations\":[\"guanajuato/universidad-gto-sede-belen\",\"ciceg\",\"irapuato/bomberos\",\"t-21\",\"facultad-de-medicina\"]}"));
+            cities.Add(JsonSerializer.Deserialize<City>("{\"Country\":\"mexico\",\"Name\":\"yucatan\",\"Stations\":[\"merida/sds01\",\"merida/seduma01\"]}"));
+            cities.Add(JsonSerializer.Deserialize<City>("{\"Country\":\"mexico\",\"Name\":\"oaxaca\",\"Stations\":[\"casa-hogar\",\"cedart\"]}"));
+            cities.Add(JsonSerializer.Deserialize<City>("{\"Country\":\"mexico\",\"Name\":\"guadalajara\",\"Stations\":[\"tlaquepaque\",\"miravalle\",\"vallarta\",\"las-pintas\",\"loma-dorada\"]}"));
+            // manually added city
             cities.Add(new City {
                 Country = "mexico",
                 Name = "jalisco", // guadalajara is also good
                 Stations = new List<string>(new string[]{"oblatos", "aguilas"})
-                });
-            cities.Add(new City {
-                Country = "mexico",
-                Name = "guadalajara",
-                Stations = new List<string>(new string[]{"vallarta", "tlaquepaque"})
                 });
 
             var envVarsWaqiGetCityFeed = new List<KeyValuePair<string, string>>();
